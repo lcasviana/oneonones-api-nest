@@ -1,0 +1,45 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Employee {
+  id                String     @id @default(uuid())
+  email             String     @unique
+  name              String
+  createdAt         DateTime   @default(now())
+  updatedAt         DateTime?
+  oneononesAsLeader Oneonone[] @relation("OneononesAsLeader")
+  oneononesAsLed    Oneonone[] @relation("OneononesAsLed")
+  meetingsAsLeader  Meeting[]  @relation("MeetingsAsLeader")
+  meetingsAsLed     Meeting[]  @relation("MeetingsAsLed")
+}
+
+model Oneonone {
+  id          String    @id @default(uuid())
+  leaderId    String
+  ledId       String
+  frequency   Int
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime?
+  leader      Employee  @relation(name: "OneononesAsLeader", fields: [leaderId], references: [id])
+  led         Employee  @relation(name: "OneononesAsLed", fields: [ledId], references: [id])
+  @@unique([leaderId, ledId])
+}
+
+model Meeting {
+  id          String    @id @default(uuid())
+  leaderId    String
+  ledId       String
+  meetingDate DateTime
+  annotation  String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime?
+  leader      Employee  @relation(name: "MeetingsAsLeader", fields: [leaderId], references: [id])
+  led         Employee  @relation(name: "MeetingsAsLed", fields: [ledId], references: [id])
+  @@unique([leaderId, ledId])
+}
